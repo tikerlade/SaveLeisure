@@ -7,7 +7,7 @@ install:
 
 script:
   - flake8
-  - mypy
+  - mypy .
   - black
   - coverage run -m pytest
 
