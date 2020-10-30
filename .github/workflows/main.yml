@@ -27,7 +27,6 @@ jobs:
     - name: Test with pytest
       run: |
         coverage run -m pytest
-        coverage-badge -o .github/artifacts/test_coverage.svg
 
   deploy:
     needs: test
