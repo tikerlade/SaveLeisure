@@ -1,5 +1,5 @@
 # SaveLeisure
-[![Actions Status](https://github.com/tikerlade/SaveLeisure/workflows/Deploy/badge.svg)](https://github.com/tikerlade/SaveLeisure/actions)
+[![Build Status](https://travis-ci.com/tikerlade/SaveLeisure.svg?token=QXtXzRqKNghyH5soGYoY&branch=main)](https://travis-ci.com/tikerlade/SaveLeisure)
 [![codecov](https://codecov.io/gh/tikerlade/SaveLeisure/branch/main/graph/badge.svg?token=I8T7ALFRTX)](https://codecov.io/gh/tikerlade/SaveLeisure)
 
 

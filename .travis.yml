@@ -7,7 +7,14 @@ install:
 
 script:
   - flake8
+  - mypy
+  - black
   - coverage run -m pytest
 
 after_success:
   - bash <(curl -s https://codecov.io/bash)
+
+deploy:
+  provider: heroku
+  api_key: HEROKU_TOKEN
+  app: save-leisure
