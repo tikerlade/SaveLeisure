@@ -10,5 +10,4 @@ script:
   - coverage run -m pytest
 
 after_success:
-  - export "$CODECOV_TOKEN"
   - bash <(curl -s https://codecov.io/bash)
