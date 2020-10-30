@@ -2,3 +2,4 @@ gunicorn==19.6.0
 flask==0.12.2
 coverage==5.3
 pytest==6.1.2
+coverage-badge==1.0.1
