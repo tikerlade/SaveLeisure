@@ -18,5 +18,4 @@ deploy:
   provider: heroku
   api_key: HEROKU_TOKEN
   app: save-leisure
-  on:
-    all_branches: true
+  on: main
