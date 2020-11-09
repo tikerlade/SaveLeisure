@@ -1,1 +1,1 @@
-web: gunicorn save_leisure.wsgi:app --log-file -
+web: gunicorn save_leisure.wsgi:application --log-file -
