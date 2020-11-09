@@ -16,6 +16,6 @@ after_success:
 
 deploy:
   provider: heroku
-  api_key: HEROKU_TOKEN
+  api_key: "HEROKU_TOKEN"
   app: save-leisure
   on: main
