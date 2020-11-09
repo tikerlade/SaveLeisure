@@ -7,8 +7,8 @@ install:
 
 script:
   - flake8
-  - mypy .
-  - black
+  - mypy ./save_leisure/*
+  - black .
   - coverage run -m pytest
 
 after_success:
