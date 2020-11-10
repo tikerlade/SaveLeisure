@@ -4,7 +4,7 @@
 [![Code style: black](https://img.shields.io/badge/code%20style-black-000000.svg)](https://github.com/psf/black)
 
 
-Telegram bot that will save interesting information that you send to it and which you want to read / watch later. Such information as a blogpost, film, book.
+Telegram bot that will save interesting information that you send to it and which you want to read / watch later. Such information as a blogpost :scroll:, film :movie_camera: or book :books:.
 
 
 ## Scheme of used Database [[link]](https://dbdiagram.io/d/5fa924cf3a78976d7b7b1930)
