@@ -11,7 +11,10 @@ import logging
 import os
 
 from django.core.wsgi import get_wsgi_application
+from emoji import emojize
 from telegram.ext import CommandHandler, Filters, MessageHandler, Updater
+
+from bot.models import User
 
 # Django part
 os.environ.setdefault("DJANGO_SETTINGS_MODULE", "save_leisure.settings")
@@ -23,17 +26,57 @@ logging.basicConfig(
 
 # Bot part
 def start(update, context):
-    """Greeting message from bot after /start received."""
+    """
+    Greeting message from bot after /start received.
+    In addition new user added to database.
+    """
+
+    # Some initialization
+    user_id = update.effective_user.id
+    chat_id = update.effective_chat.id
+    respond_text = (
+        "I'm a SaveLeisure :robot:, please talk to me :speech_balloon:!\n"
+        "Currently I'm able only to echo your messages :hear_no_evil:"
+    )
+
+    # Check if user has already been added to database
+    if User.objects.filter(telegram_id=user_id):
+        respond_text = (
+            "I know you were here before :expressionless:\n"
+            "I'm just kidding, welcome again :heart_eyes:\n"
+            "Maybe later you could delete your profile and"
+            " start a new one, but it is not for sure :thinking_face:"
+        )
+    else:
+        user = User(chat_id=chat_id, telegram_id=user_id)
+        user.save()
+
+    # Send message
     context.bot.send_message(
-        chat_id=update.effective_chat.id,
-        text="I'm a SaveLeisure bot, please talk to me!"
-        + "Currently I'm able only to echo your messages :(",
+        chat_id=update.effective_chat.id, text=emojize(respond_text, use_aliases=True),
     )
 
 
 def echo(update, context):
     """Send user message with his text. Like echo in the mountains"""
-    context.bot.send_message(chat_id=update.effective_chat.id, text=update.message.text)
+    respond_text = update.message.text
+    user_id = update.effective_user.id
+
+    # Check if user has used /start command (registered in database)
+    if not User.objects.filter(telegram_id=user_id):
+        respond_text = "You haven't used /start command :warning:\nPlease do it!"
+
+    # Check wheather it is responding or not
+    if update.message.reply_to_message:
+        respond_text = (
+            "I know that you a responding to some other message :grinning:\n"
+            "But currently I can't understand the sense"
+        )
+
+    # Send message
+    context.bot.send_message(
+        chat_id=update.effective_chat.id, text=emojize(respond_text, use_aliases=True)
+    )
 
 
 # Basic connection setup
