@@ -14,11 +14,11 @@ from django.core.wsgi import get_wsgi_application
 from emoji import emojize
 from telegram.ext import CommandHandler, Filters, MessageHandler, Updater
 
-from bot.models import User
-
 # Django part
 os.environ.setdefault("DJANGO_SETTINGS_MODULE", "save_leisure.settings")
 application = get_wsgi_application()
+
+from bot.models import User
 
 logging.basicConfig(
     format="%(asctime)s - %(name)s - %(levelname)s - %(message)s", level=logging.INFO
