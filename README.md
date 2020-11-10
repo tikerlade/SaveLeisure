@@ -10,6 +10,11 @@ Telegram bot that will save interesting information that you send to it and whic
 ## Scheme of used Database [[link]](https://dbdiagram.io/d/5fa924cf3a78976d7b7b1930)
 ![Database scheme](pics/database_scheme.png)
 
+## Current stage
+* `echo` messages supported
+* `/start` command is mandatory to use at least once
+* Detection of responding to some message
+* Detection of using `/start` more than once. Maybe in the future add re-creating of account
 
 
 > Bot :robot: is available by the following [link](http://t.me/SaveLeisureBot)

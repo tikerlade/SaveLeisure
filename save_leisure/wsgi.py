@@ -19,6 +19,7 @@ from bot.models import User
 # Django part
 os.environ.setdefault("DJANGO_SETTINGS_MODULE", "save_leisure.settings")
 application = get_wsgi_application()
+
 logging.basicConfig(
     format="%(asctime)s - %(name)s - %(levelname)s - %(message)s", level=logging.INFO
 )
