@@ -13,12 +13,17 @@ Including another URLconf
     1. Import the include() function: from django.urls import include, path
     2. Add a URL to urlpatterns:  path('blog/', include('blog.urls'))
 """
+import os
+
 from django.contrib import admin
 from django.urls import path
 
 from save_leisure.views import home_view
 
+TELEGRAM_TOKEN = str(os.getenv("TELEGRAM_TOKEN"))
+
 urlpatterns = [
     path("", home_view, name="home"),
     path("admin/", admin.site.urls),
+    path(TELEGRAM_TOKEN, home_view, name="home"),
 ]
