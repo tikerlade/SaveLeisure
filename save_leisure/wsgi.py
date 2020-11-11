@@ -18,6 +18,10 @@ from telegram.ext import CommandHandler, Filters, MessageHandler, Updater
 os.environ.setdefault("DJANGO_SETTINGS_MODULE", "save_leisure.settings")
 application = get_wsgi_application()
 
+PORT = int(os.environ.get("PORT", 5000))
+TELEGRAM_TOKEN = os.getenv("TELEGRAM_TOKEN")
+HEROKU_URL = "https://save-leisure.herokuapp.com/"
+
 from bot.models import User
 
 logging.basicConfig(
@@ -80,17 +84,25 @@ def echo(update, context):
     )
 
 
-# Basic connection setup
-updater = Updater(token=os.getenv("TELEGRAM_TOKEN"), use_context=True)
-dispatcher = updater.dispatcher
+def main():
+    # Basic connection setup
+    updater = Updater(token=TELEGRAM_TOKEN, use_context=True)
+    dispatcher = updater.dispatcher
 
-# Handlers initialization
-start_handler = CommandHandler("start", start)
-echo_handler = MessageHandler(Filters.text & (~Filters.command), echo)
+    # Handlers initialization
+    start_handler = CommandHandler("start", start)
+    echo_handler = MessageHandler(Filters.text & (~Filters.command), echo)
 
-# Setting dispatcher to use handlers
-dispatcher.add_handler(echo_handler)
-dispatcher.add_handler(start_handler)
+    # Setting dispatcher to use handlers
+    dispatcher.add_handler(echo_handler)
+    dispatcher.add_handler(start_handler)
 
-# Start to listen for messages
-updater.start_polling()
+    # Start to listen for messages
+    updater.start_polling()
+
+    updater.start_webhook(listen="0.0.0.0", port=int(PORT), url_path=TELEGRAM_TOKEN)
+    updater.bot.setWebhook(HEROKU_URL + TELEGRAM_TOKEN)
+
+
+if __name__ == "__main__":
+    main()
