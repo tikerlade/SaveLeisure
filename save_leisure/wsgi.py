@@ -9,6 +9,7 @@ https://docs.djangoproject.com/en/3.1/howto/deployment/wsgi/
 
 import logging
 import os
+import socket
 
 from django.core.wsgi import get_wsgi_application
 from emoji import emojize
@@ -18,12 +19,21 @@ from telegram.ext import CommandHandler, Filters, MessageHandler, Updater
 os.environ.setdefault("DJANGO_SETTINGS_MODULE", "save_leisure.settings")
 application = get_wsgi_application()
 
-PORT = int(os.environ.get("PORT", "5000"))
 TELEGRAM_TOKEN = str(os.getenv("TELEGRAM_TOKEN"))
 HEROKU_URL = "https://save-leisure.herokuapp.com/"
 
 from bot.models import User
 
+
+def get_free_tcp_port():
+    tcp = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
+    tcp.bind(("", 0))
+    addr, port = tcp.getsockname()
+    tcp.close()
+    return port
+
+
+PORT = get_free_tcp_port()
 logging.basicConfig(
     format="%(asctime)s - %(name)s - %(levelname)s - %(message)s", level=logging.INFO
 )
