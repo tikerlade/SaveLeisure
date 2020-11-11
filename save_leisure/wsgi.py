@@ -98,7 +98,7 @@ def main():
     dispatcher.add_handler(start_handler)
 
     # Start to listen for messages
-    updater.start_polling()
+    # updater.start_polling()
 
     updater.start_webhook(listen="0.0.0.0", port=int(PORT), url_path=TELEGRAM_TOKEN)
     updater.bot.setWebhook(HEROKU_URL + TELEGRAM_TOKEN)
