@@ -18,7 +18,7 @@ from telegram.ext import CommandHandler, Filters, MessageHandler, Updater
 os.environ.setdefault("DJANGO_SETTINGS_MODULE", "save_leisure.settings")
 application = get_wsgi_application()
 
-PORT = int(os.environ.get("PORT", "8443"))
+PORT = int(os.environ.get("PORT", "8000"))
 TELEGRAM_TOKEN = str(os.getenv("TELEGRAM_TOKEN"))
 HEROKU_URL = "https://save-leisure.herokuapp.com/"
 
