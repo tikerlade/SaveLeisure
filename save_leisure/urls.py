@@ -25,5 +25,5 @@ TELEGRAM_TOKEN = str(os.getenv("TELEGRAM_TOKEN"))
 urlpatterns = [
     path("", home_view, name="home"),
     path("admin/", admin.site.urls),
-    path(TELEGRAM_TOKEN, home_view, name="home"),
+    path(TELEGRAM_TOKEN + "/", home_view, name="home"),
 ]
