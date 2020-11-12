@@ -33,7 +33,7 @@ def get_free_tcp_port():
     return port
 
 
-PORT = get_free_tcp_port()
+PORT = "80"
 logging.basicConfig(
     format="%(asctime)s - %(name)s - %(levelname)s - %(message)s", level=logging.INFO
 )
