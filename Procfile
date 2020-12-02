@@ -1,1 +1,1 @@
-web: gunicorn save_leisure.wsgi:application --log-file -
+web: python manage.py runserver --log-file -
