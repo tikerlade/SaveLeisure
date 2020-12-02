@@ -50,4 +50,4 @@ updater.start_webhook(listen="0.0.0.0",
                       port=PORT,
                       url_path=TELEGRAM_TOKEN)
 updater.bot.set_webhook("https://delete-bot-webhook.herokuapp.com/" + TELEGRAM_TOKEN)
-updater.idle()
+# updater.idle()
