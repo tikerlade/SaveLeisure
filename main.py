@@ -31,7 +31,7 @@ RUNNING_MODE = "PRODUCTION"
 TELEGRAM_TOKEN = str(os.getenv("TELEGRAM_TOKEN"))
 HEROKU_URL = str(os.getenv("HEROKU_URL"))
 DATABASE_URL = str(os.getenv("DATABASE_URL"))
-PORT = int(os.environ.get("PORT", "8443"))
+PORT = int(os.environ.get("PORT", "88"))
 
 # Stages
 FIRST, SECOND, THIRD, FOURTH, FIFTH, SIXTH, SEVEN = range(7)
