@@ -1,18 +1,8 @@
-"""
-WSGI config for save_leisure project.
-
-It exposes the WSGI callable as a module-level variable named ``application``.
-
-For more information on this file, see
-https://docs.djangoproject.com/en/3.1/howto/deployment/wsgi/
-"""
-
 import logging
 import os
-import socket
 
-from django.core.wsgi import get_wsgi_application
 from emoji import emojize
+from sqlalchemy import create_engine
 from telegram.ext import (
     CommandHandler,
     Filters,
@@ -20,47 +10,31 @@ from telegram.ext import (
     Updater,
     CallbackQueryHandler,
     ConversationHandler,
-    CallbackContext,
 )
-from telegram import (
-    InlineKeyboardButton,
-    InlineKeyboardMarkup,
-    ReplyKeyboardMarkup,
-    KeyboardButton,
-    KeyboardButtonPollType,
-    Update,
-)
+from telegram import InlineKeyboardButton, InlineKeyboardMarkup
 
-# Django part
-os.environ.setdefault("DJANGO_SETTINGS_MODULE", "save_leisure.settings")
-application = get_wsgi_application()
+from bot.models import User, ToSeeItem
+
 
 # TELEGRAM_TOKEN = str(os.getenv("TELEGRAM_TOKEN"))
-TELEGRAM_TOKEN = "1333523508:AAG-iK2wa8Iqvgum-NHs-gZ7h5SxsA-FVmU"
+RUNNING_MODE = "LOCAL"
+TELEGRAM_TOKEN = "1333523508:AAFXPXOq6gqDWdkmcrSkO6vtJ8qo4BHeNX4"
 HEROKU_URL = "https://save-leisure.herokuapp.com/"
-
-from bot.models import User, ToSeeItem, ItemType
-
-
-def get_free_tcp_port():
-    tcp = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
-    tcp.bind(("", 0))
-    addr, port = tcp.getsockname()
-    tcp.close()
-    return port
-
-
-PORT = 88
-logging.basicConfig(
-    format="%(asctime)s - %(name)s - %(levelname)s - %(message)s", level=logging.INFO
+DATABASE_URL = (
+    "postgres://omxbanrlsumfpk:317fb8be7bd280c66584eaf2fda490dc943cba21a2ece0a"
+    "2083bde83ecb45500@ec2-54-76-215-139.eu-west-1.compute.amazonaws.com:5432/ddf5j5bc9m59po"
 )
 
 # Stages
 FIRST, SECOND, THIRD, FOURTH, FIFTH, SIXTH, SEVEN = range(7)
 END_CONFIRMATION = 8
 
+PORT = int(os.environ.get("PORT", "8443"))
+logging.basicConfig(
+    format="%(asctime)s - %(name)s - %(levelname)s - %(message)s", level=logging.INFO
+)
 
-# Bot part
+
 def start(update, context):
     """
     Greeting message from bot after '/start' received.
@@ -480,7 +454,7 @@ def main():
         entry_points=[
             CommandHandler("start", start),
             MessageHandler(Filters.forwarded, new_forwarded_item),
-            MessageHandler(Filters.text, cancel),
+            MessageHandler(Filters.text, start),
         ],
         states={
             FIRST: [
@@ -517,12 +491,17 @@ def main():
     # Add ConversationHandler to dispatcher for handle updates of conversation
     dispatcher.add_handler(conv_handler)
 
-    # Start listening for updates
-    updater.start_polling()
+    # Start receiving updates
+    if RUNNING_MODE == "LOCAL":
+        updater.start_polling()
+    elif RUNNING_MODE == "PRODUCTION":
+        updater.start_webhook(listen="0.0.0.0", port=PORT, url_path=TELEGRAM_TOKEN)
+
+    # Close listener when it's necessary
     updater.idle()
 
 
 if __name__ == "__main__":
-    # TELEGRAM_TOKEN = os.getenv('TELEGRAM_TOKEN')
+    engine = create_engine(DATABASE_URL)
 
     main()
