@@ -577,6 +577,10 @@ def main():
 
 
 if __name__ == "__main__":
+    print(RUNNING_MODE)
+    print(DATABASE_URL)
+    print(HEROKU_URL)
+    print(TELEGRAM_TOKEN)
     # Initialize database management objects
     engine = create_engine(DATABASE_URL)
     session = sessionmaker(bind=engine)()
