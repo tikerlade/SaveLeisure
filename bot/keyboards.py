@@ -10,16 +10,18 @@ welcome_keyboard = [
     [
         InlineKeyboardButton(
             emojize("Add new item :NEW_button:"), callback_data="new_item"
-        ),
+        )
+    ],
+    [
         InlineKeyboardButton(
             emojize("Get my items :page_with_curl:"), callback_data="get_items"
-        ),
-        # InlineKeyboardButton(emojize("Add my own category :package:"), callback_data="new_category"),
-        InlineKeyboardButton(
-            emojize("Information :information:"), callback_data="info"
-        ),
+        )
     ],
-    [InlineKeyboardButton(emojize("End :stop_sign:"), callback_data="end")],
+    [
+        # InlineKeyboardButton(emojize("Add my own category :package:"), callback_data="new_category"),
+        InlineKeyboardButton(emojize("Information :information:"), callback_data="info")
+    ],
+    [InlineKeyboardButton(emojize("End :stop_sign:"), callback_data="end"),],
 ]
 welcome_keyboard_markup = InlineKeyboardMarkup(welcome_keyboard)
 

@@ -6,7 +6,7 @@
 
 Telegram bot that will save interesting information that you send to it and which you want to read / watch later. Such information as a blogpost :page_with_curl:, film :movie_camera: or book :books:.
 
-
+![Adding item](pics/adding_item.gif)
 
 
 ## Current stage :watch:
