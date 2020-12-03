@@ -1,1 +1,1 @@
-web: gunicorn save_leisure.wsgi --log-file -
+web: python main.py

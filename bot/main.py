@@ -1,35 +1,42 @@
+"""
+Main functionality and logic of bot. Handlers, running, functions, database working - all happens here.
+"""
 import logging
 import os
+from datetime import datetime
 
 from emoji import emojize
 from sqlalchemy import create_engine
+from sqlalchemy.orm import sessionmaker
+from telegram import ParseMode
 from telegram.ext import (
+    CallbackQueryHandler,
     CommandHandler,
+    ConversationHandler,
     Filters,
     MessageHandler,
     Updater,
-    CallbackQueryHandler,
-    ConversationHandler,
 )
-from telegram import InlineKeyboardButton, InlineKeyboardMarkup
 
-from bot.models import User, ToSeeItem
-
-
-# TELEGRAM_TOKEN = str(os.getenv("TELEGRAM_TOKEN"))
-RUNNING_MODE = "LOCAL"
-TELEGRAM_TOKEN = "1333523508:AAFXPXOq6gqDWdkmcrSkO6vtJ8qo4BHeNX4"
-HEROKU_URL = "https://save-leisure.herokuapp.com/"
-DATABASE_URL = (
-    "postgres://omxbanrlsumfpk:317fb8be7bd280c66584eaf2fda490dc943cba21a2ece0a"
-    "2083bde83ecb45500@ec2-54-76-215-139.eu-west-1.compute.amazonaws.com:5432/ddf5j5bc9m59po"
+from bot.keyboards import (
+    end_confirmation_keyboard_markup,
+    get_types_keyboard_markup,
+    types_keyboard_markup,
+    welcome_keyboard_markup,
 )
+from bot.models import ItemType, ToSeeItem, User
+
+# General information
+RUNNING_MODE = "PRODUCTION"
+TELEGRAM_TOKEN = str(os.getenv("TELEGRAM_TOKEN"))
+HEROKU_URL = str(os.getenv("HEROKU_APP"))
+DATABASE_URL = str(os.getenv("DATABASE_URL"))
+PORT = int(os.environ.get("PORT", "8443"))
 
 # Stages
 FIRST, SECOND, THIRD, FOURTH, FIFTH, SIXTH, SEVEN = range(7)
-END_CONFIRMATION = 8
+END_CONFIRMATION = 18
 
-PORT = int(os.environ.get("PORT", "8443"))
 logging.basicConfig(
     format="%(asctime)s - %(name)s - %(levelname)s - %(message)s", level=logging.INFO
 )
@@ -42,98 +49,82 @@ def start(update, context):
     """
 
     # Some initialization
-    user_id = update.effective_user.id
+    telegram_id = update.effective_user.id
     chat_id = update.effective_chat.id
     respond_text = (
         "I'm a SaveLeisure :robot:, please talk to me :speech_balloon:!\n"
         "Currently I'm able only to echo your messages :hear_no_evil:"
     )
 
-    # Keyboard with 3 options from the start
-    keyboard = [
-        [InlineKeyboardButton("Add new item", callback_data="new_item")],
-        [InlineKeyboardButton("Get my items", callback_data="get_items")],
-        [InlineKeyboardButton("Information", callback_data="info")],
-    ]
-    keyboard = InlineKeyboardMarkup(keyboard)
-
     # Check if user has already been added to database
-    # if User.objects.filter(telegram_id=user_id):
-    #     # If user has already been created - detect it
-    #     respond_text = (
-    #         "I know you were here before :expressionless:\n"
-    #         "I'm just kidding, welcome again :heart_eyes:\n"
-    #         "Maybe later you could delete your profile and"
-    #         " start a new one, but it is not for sure :thinking_face:"
-    #     )
-    # else:
-    #     # If user used /start in a first time - register him
-    #     user = User(chat_id=chat_id, telegram_id=user_id)
-    #     user.save()
+    if session.query(User).filter_by(telegram_id=telegram_id).first():
+        # If user has already been created - detect it
+        respond_text = (
+            "I know you were here before :expressionless:\n"
+            "I'm just kidding, welcome again :heart_eyes:\n"
+            "Maybe later you could delete your profile and"
+            " start a new one, but it is not for sure :thinking_face:"
+        )
+    else:
+        # If user used /start in a first time - register him
+        new_user = User(
+            chat_id=chat_id, telegram_id=telegram_id, registration_date=datetime.today()
+        )
+        session.add(new_user)
+        session.commit()
 
     # Send message with information about what has been done
     context.bot.send_message(
         chat_id=update.effective_chat.id,
         text=emojize(respond_text, use_aliases=True),
-        reply_markup=keyboard,
+        reply_markup=welcome_keyboard_markup,
     )
 
     return FIRST
 
 
-def new_item(update, context):
+def send_answer(update, context, arguments):
     query = update.callback_query
-    query.answer()
+    if not query:
+        context.bot.send_message(chat_id=update.effective_chat.id, **arguments)
+    else:
+        query.answer()
+        query.edit_message_text(**arguments)
 
-    keyboard = [
-        [
-            InlineKeyboardButton(emojize("Film :cinema:"), callback_data="cinema"),
-            InlineKeyboardButton(emojize("Paper :scroll:"), callback_data="scroll"),
-            InlineKeyboardButton(emojize("Book :books:"), callback_data="book"),
-        ],
-        [
-            InlineKeyboardButton(
-                emojize("Cancel :cross_mark:"), callback_data="cross_mark"
-            )
-        ],
-    ]
-    reply_markup = InlineKeyboardMarkup(keyboard)
 
-    query.edit_message_text(
-        text=emojize(
+def new_iteration(update, context):
+    # Some initialization
+    respond_text = "I like to see you here again :heart_eyes:\nHow can I help you?"
+
+    # Send message with information about what has been done
+    context.bot.send_message(
+        chat_id=update.effective_chat.id,
+        text=emojize(respond_text, use_aliases=True),
+        reply_markup=welcome_keyboard_markup,
+    )
+    return FIRST
+
+
+def new_item(update, context):
+    arguments = {
+        "text": emojize(
             f"Okay :fire:, Tell me what is your item you want to add is about"
         ),
-        reply_markup=reply_markup,
-    )
+        "reply_markup": types_keyboard_markup,
+    }
+
+    send_answer(update, context, arguments)
 
     return SECOND
 
 
 def get_items(update, context):
-    query = update.callback_query
-    query.answer()
+    arguments = {
+        "text": emojize(f"Okay :fire:, Tell me what type of items you want to get"),
+        "reply_markup": get_types_keyboard_markup,
+    }
 
-    keyboard = [
-        [
-            InlineKeyboardButton(emojize("Film :cinema:"), callback_data="cinema"),
-            InlineKeyboardButton(emojize("Paper :scroll:"), callback_data="scroll"),
-            InlineKeyboardButton(emojize("Book :books:"), callback_data="book"),
-        ],
-        [
-            InlineKeyboardButton(
-                emojize("Mix :person_shrugging:"), callback_data="mix"
-            ),
-            InlineKeyboardButton(
-                emojize("Cancel :cross_mark:"), callback_data="cross_mark"
-            ),
-        ],
-    ]
-    reply_markup = InlineKeyboardMarkup(keyboard)
-
-    query.edit_message_text(
-        text=emojize(f"Okay :fire:, Tell me what type of items you want to get"),
-        reply_markup=reply_markup,
-    )
+    send_answer(update, context, arguments)
 
     return FOURTH
 
@@ -142,54 +133,154 @@ def get_items_type(update, context):
     query = update.callback_query
     query.answer()
 
-    query.edit_message_text("Now enter how many items to return to you")
+    query.edit_message_text(
+        text=emojize(
+            f"Now enter how many :{query.data}: to return to you :input_numbers:"
+        ),
+        reply_markup=end_confirmation_keyboard_markup,
+    )
+    context.user_data["get_data_type"] = query.data
 
     return FIFTH
 
 
 def get_items_number(update, context):
-    number = int(update.message.text)
 
-    for i in range(number):
-        update.message.reply_text(str(i))
+    print(update.message.text)
+    # Check that input is a number.
+    number = update.message.text
+    if not number.isnumeric():
+        context.bot.send_message(
+            chat_id=update.effective_chat.id,
+            text=emojize("No no no! It's not a number! Try again. :warning_selector:"),
+        )
 
-    keyboard = [
-        [
-            InlineKeyboardButton(emojize("End :stop_sign:"), callback_data="end"),
-            InlineKeyboardButton(
-                emojize("To beginning :right_arrow_curving_left:"),
-                callback_data="to_beginning",
-            ),
-        ],
-    ]
-    reply_markup = InlineKeyboardMarkup(keyboard)
+        # Return to this stage.
+        return FIFTH
 
+    # Get other users parameters for database query.
+    data_type = context.user_data["get_data_type"]
+    telegram_id = update.effective_user.id
+    number = int(number)
+
+    # Get foreign keys for datatbase query.
+    user = session.query(User).filter_by(telegram_id=telegram_id).first()
+    item_type = session.query(ItemType).filter_by(data_type=data_type).first()
+
+    # Retrieve data with given parameters.
+    if item_type:
+        # If one of known types was selected.
+        items = (
+            session.query(ToSeeItem)
+            .filter_by(user_id=user.user_id, type_id=item_type.type_id, showed=False)
+            .all()
+        )
+    else:
+        # If mix was selected as type.
+        items = (
+            session.query(ToSeeItem).filter_by(user_id=user.user_id, showed=False).all()
+        )
+
+    # Send received items
+    respond_text = "Do you want to try again or you leaving?"
+    if not items:
+        # No items of given data was found.
+        respond_text = (
+            f"You have not added any :{data_type}: yet :pensive_face:.\n" + respond_text
+        )
+    else:
+        # Send each message which was retrieved.
+        context.user_data["items"] = {}
+
+        if len(items) < number:
+            context.bot.send_message(
+                chat_id=update.effective_chat.id,
+                text=emojize(
+                    f"You have only {len(items)}/{number} of :{data_type}: and here they are"
+                ),
+            )
+
+        for idx in range(min(len(items), number)):
+            context.user_data["items"][idx + 1] = items[idx].record_id
+            print(items[idx].record_id)
+
+            context.bot.send_message(
+                text=emojize(number_to_emoji(idx + 1)),
+                chat_id=update.effective_chat.id,
+                reply_to_message_id=items[idx].message_id,
+            )
+
+            # TODO update value of showed to True
+            session.query(ToSeeItem).filter(
+                ToSeeItem.record_id == items[idx].record_id
+            ).update({ToSeeItem.showed: True})
+            session.commit()
+
+        # Information about user can skip his information.
+        context.bot.send_message(
+            text="If you want to skip some items and mark them as unread you can do so.\n"
+            "However it will work only with last sent by me numbers.\n"
+            "Just follow the instructions after the command:\n"
+            "`/unread`",
+            chat_id=update.effective_chat.id,
+            parse_mode=ParseMode.MARKDOWN,
+        )
+
+    # Prompt for staying and use bot one more time.
     update.message.reply_text(
-        text=emojize("Do you want to try again or you leaving?"),
-        reply_markup=reply_markup,
+        text=emojize(respond_text), reply_markup=end_confirmation_keyboard_markup
     )
 
+    # Move to confirmation of users choice for following up.
     return END_CONFIRMATION
 
 
 def get_info(update, context):
-    query = update.callback_query
-    query.answer()
+    arguments = {
+        "text": emojize(
+            "This is a bot :robot_face: for automation your basic routine of sending staff that you want to"
+            " read :SOON_arrow: to your *Saved Messages* which will "
+            "shortly become a mess :woozy_face: where you can't find anything.\n\n"
+            "`Forwarding` - forward article that you like to bot and save it\n\n"
+            "`/start` - start a conversation with this bot\n"
+            "`/help` - here you are\n"
+            "`/new` - add new item to your list\n"
+            "`/get` - get items from your added items\n"
+            "`/unread` - mark listed items as unread\n"
+            "`/stats` - will give you general statistics\n"
+            "`/end` - end current conversation\n\n"
+            "`/new` & `/get` will give you options :gear_selector: to set everything as you need.\n\n"
+            ":warning_selector: Developing is still in progress :warning_selector:"
+        ),
+        "parse_mode": ParseMode.MARKDOWN,
+        "reply_markup": end_confirmation_keyboard_markup,
+    }
 
-    keyboard = [
-        [
-            InlineKeyboardButton(emojize("End :stop_sign:"), callback_data="end"),
-            InlineKeyboardButton(
-                emojize("To beginning :right_arrow_curving_left:"),
-                callback_data="to_beginning",
-            ),
-        ],
-    ]
-    reply_markup = InlineKeyboardMarkup(keyboard)
+    send_answer(update, context, arguments)
 
-    query.edit_message_text(
-        text=emojize("Here will be provided full help information"),
-        reply_markup=reply_markup,
+    return END_CONFIRMATION
+
+
+def stat(update, context):
+
+    respond_text = "Based on your full history of adding items.\nHere are some stats :bar_chart: about them:\n\n"
+    item_types = ["cinema", "page_with_curl", "books"]
+    item_to_count = {}
+
+    for item in item_types:
+        type_id = session.query(ItemType).filter_by(data_type=item).first().type_id
+        counter = len(session.query(ToSeeItem).filter_by(type_id=type_id).all())
+
+        item_to_count[item] = counter
+        respond_text += f":{item}: - {counter} items\n"
+
+    respond_text += "\nThank you for using me :folded_hands:"
+
+    context.bot.send_message(
+        text=emojize(respond_text),
+        chat_id=update.effective_chat.id,
+        parse_mode=ParseMode.MARKDOWN,
+        reply_markup=end_confirmation_keyboard_markup,
     )
 
     return END_CONFIRMATION
@@ -199,7 +290,13 @@ def new_item_type(update, context):
     query = update.callback_query
     query.answer()
 
-    query.edit_message_text("Now send me a message with information you want to store.")
+    query.edit_message_text(
+        text=emojize(
+            f"Now send me information about :{query.data}: you want to store."
+        ),
+        reply_markup=end_confirmation_keyboard_markup,
+    )
+    context.user_data["data_type"] = query.data
 
     return THIRD
 
@@ -219,16 +316,9 @@ def to_beginning(update, context):
     query = update.callback_query
     query.answer()
 
-    keyboard = [
-        [InlineKeyboardButton("Add new item", callback_data="new_item")],
-        [InlineKeyboardButton("Get my items", callback_data="get_items")],
-        [InlineKeyboardButton("Information", callback_data="info")],
-    ]
-    keyboard = InlineKeyboardMarkup(keyboard)
-
     query.edit_message_text(
         text=emojize("Please choose your next step", use_aliases=True),
-        reply_markup=keyboard,
+        reply_markup=welcome_keyboard_markup,
     )
 
     return FIRST
@@ -238,20 +328,9 @@ def cross_mark(update, context):
     query = update.callback_query
     query.answer()
 
-    keyboard = [
-        [
-            InlineKeyboardButton(emojize("End :stop_sign:"), callback_data="end"),
-            InlineKeyboardButton(
-                emojize("To beginning :right_arrow_curving_left:"),
-                callback_data="to_beginning",
-            ),
-        ],
-    ]
-    reply_markup = InlineKeyboardMarkup(keyboard)
-
     query.edit_message_text(
         text=emojize("Do you want to try again or you leaving?"),
-        reply_markup=reply_markup,
+        reply_markup=end_confirmation_keyboard_markup,
     )
 
     return END_CONFIRMATION
@@ -259,187 +338,153 @@ def cross_mark(update, context):
 
 def save_item(update, context):
 
-    # Store users data
-    print(context.user_data)
+    # Information retrieving
+    data_type = context.user_data["data_type"]
+    telegram_id = update.effective_user.id
+    message_id = update.message.message_id
+    message_date = update.message.date
+    text = update.message.text
 
-    keyboard = [
-        [
-            InlineKeyboardButton(emojize("End :stop_sign:"), callback_data="end"),
-            InlineKeyboardButton(
-                emojize("To beginning :right_arrow_curving_left:"),
-                callback_data="to_beginning",
-            ),
-        ],
-    ]
-    reply_markup = InlineKeyboardMarkup(keyboard)
+    # # Foreign keys extracting
+    user = session.query(User).filter_by(telegram_id=telegram_id).first()
+    item_type = session.query(ItemType).filter_by(data_type=data_type).first()
+
+    # Register new item for user
+    new_item = ToSeeItem(
+        user_id=user.user_id,
+        message_id=message_id,
+        date_received=message_date,
+        type_id=item_type.type_id,
+        raw_data=text,
+    )
+    session.add(new_item)
+    session.commit()
 
     update.message.reply_text(
         "We have saved your information. What you will do next?",
-        reply_markup=reply_markup,
+        reply_markup=end_confirmation_keyboard_markup,
     )
 
+    # Clear used user data
+    context.user_data["data_type"] = ""
+
+    # Go to the next stage
     return END_CONFIRMATION
 
 
-def detect_forwarding(update, context):
-    """
-    Detecting when user forward to us some message.
-    After detection we need to understand which type of content was forwarded.
-    Returns to user keyboard to choose type of content.
-    """
+def new_forwarded_item(update, context):
 
-    # Initialization phase
-    user_id = str(update.effective_user.id)
-    keyboard = [
-        [
-            InlineKeyboardButton(
-                emojize(":cinema:"), callback_data="forwarding_cinema"
-            ),
-            InlineKeyboardButton(
-                emojize(":scroll:"), callback_data="forwarding_scroll"
-            ),
-            InlineKeyboardButton(emojize(":books:"), callback_data="forwarding_books"),
-        ],
-        [
-            InlineKeyboardButton(
-                emojize("Cancel :cross_mark:"), callback_data="cross_mark"
-            )
-        ],
-    ]
-    reply_markup = InlineKeyboardMarkup(keyboard)
+    context.user_data["message_id"] = update.message.message_id
+    context.user_data["message_text"] = update.message.text
 
-    # Reply with keyboard of types
     update.message.reply_text(
-        "What type of content is in message:", reply_markup=reply_markup
+        text=emojize(f"Okay :fire:, Now give me understanding of what the data it is"),
+        reply_markup=types_keyboard_markup,
     )
+
+    return SIXTH
 
 
 def new_forwarded_item_type(update, context):
     query = update.callback_query
     query.answer()
 
-    # # Information retrieving
-    # post_type = query.data
-    # user_id = query.from_user.id
-    # message_id = query.message.message_id
-    # message_date = query.message.date
-    # text = query.message.text
-    #
-    # # Foreign keys extracting
-    # user = User.objects.get(telegram_id=user_id)
-    # item_type = ItemType.objects.get(data_type=post_type)
-    #
-    # # Register new item for user
-    # item = ToSeeItem(
-    #     user_id=user,
-    #     message_id=message_id,
-    #     date_received=message_date,
-    #     data_type=item_type,
-    #     raw_data=text,
-    # )
-    # item.save()
+    # Information retrieving
+    data_type = query.data
+    telegram_id = query.from_user.id
+    message_id = int(context.user_data["message_id"])
+    message_date = query.message.date
+    text = context.user_data["message_text"]
 
-    keyboard = [
-        [
-            InlineKeyboardButton(emojize("End :stop_sign:"), callback_data="end"),
-            InlineKeyboardButton(
-                emojize("To beginning :right_arrow_curving_left:"),
-                callback_data="to_beginning",
-            ),
-        ],
-    ]
-    reply_markup = InlineKeyboardMarkup(keyboard)
+    # Foreign keys extracting
+    user = session.query(User).filter_by(telegram_id=telegram_id).first()
+    item_type = session.query(ItemType).filter_by(data_type=data_type).first()
 
-    # TODO: random emojis when they are placeholders.
+    # Register new item for user
+    new_item = ToSeeItem(
+        user_id=user.user_id,
+        message_id=message_id,
+        date_received=message_date,
+        type_id=item_type.type_id,
+        raw_data=text,
+    )
+    session.add(new_item)
+    session.commit()
+
     # Show that we have created new item for this user
     query.edit_message_text(
         text=emojize(f"Okay :fire:, Now I have registered it. What's next?"),
-        reply_markup=reply_markup,
+        reply_markup=end_confirmation_keyboard_markup,
     )
 
     return END_CONFIRMATION
 
 
-def new_forwarded_item(update, context):
-    keyboard = [
-        [
-            InlineKeyboardButton(emojize("Film :cinema:"), callback_data="cinema"),
-            InlineKeyboardButton(emojize("Paper :scroll:"), callback_data="scroll"),
-            InlineKeyboardButton(emojize("Book :books:"), callback_data="book"),
-        ],
-        [
-            InlineKeyboardButton(
-                emojize("Cancel :cross_mark:"), callback_data="cross_mark"
-            )
-        ],
-    ]
-    reply_markup = InlineKeyboardMarkup(keyboard)
+def unread(update, context):
+    respond_text = (
+        "Okay. Here is what you need to do:\n"
+        "1. Send me numbers which you have skipped from previous session."
+        "You should do that as following: `1 5 12`. Just separate them with witespace.\n"
+        "2. No more steps :winking_face_with_tongue:\n\n"
+        ":warning_selector: Just remember that it will apply only to last"
+        " numbers that I've sent to you. :warning_selector:"
+    )
+
+    context.bot.send_message(
+        text=emojize(respond_text),
+        chat_id=update.effective_chat.id,
+        parse_mode=ParseMode.MARKDOWN,
+    )
+
+    return SEVEN
+
+
+def unread_numbers(update, context):
+    respond_text = "I have marked these messages as unread :OK_hand:"
+    exception_flag = False
+
+    numbers = update.message.text.split()
+    try:
+        numbers = list(map(int, numbers))
+
+        for number in numbers:
+            session.query(ToSeeItem).filter(
+                ToSeeItem.record_id == context.user_data["items"][number]
+            ).update({ToSeeItem.showed: False})
+        session.commit()
+
+    except ValueError:
+        respond_text = "No no no! It's not a number! Try again. :warning_selector:"
 
     update.message.reply_text(
-        text=emojize(f"Okay :fire:, Now give me understanding of what the data it is"),
-        reply_markup=reply_markup,
+        text=emojize(respond_text),
+        parse_mode=ParseMode.MARKDOWN,
+        reply_markup=end_confirmation_keyboard_markup,
     )
-    return SIXTH
+
+    return END_CONFIRMATION if not exception_flag else SEVEN
 
 
-def get_all(update, context):
-    # TODO: check that user in database
-    user_id = update.effective_user.id
-    user = User.objects.get(telegram_id=user_id)
-    items = ToSeeItem.objects.filter(user_id=user)
-
-    mapping = {
-        1: "keycap_digit_one",
-        2: "keycap_digit_two",
-        3: "keycap_digit_three",
-        4: "keycap_digit_four",
+def number_to_emoji(number):
+    mapper = {
+        0: ":keycap_0:",
+        1: ":keycap_1:",
+        2: ":keycap_2:",
+        3: ":keycap_3:",
+        4: ":keycap_4:",
+        5: ":keycap_5:",
+        6: ":keycap_6:",
+        7: ":keycap_7:",
+        8: ":keycap_8:",
+        9: ":keycap_9:",
     }
+    result = ""
 
-    if len(items) > 0:
-        for idx, entry in enumerate(items, 1):
-            context.bot.send_message(
-                chat_id=update.effective_chat.id,
-                text=emojize(f":{mapping[idx]}:"),
-                reply_to_message_id=entry.message_id,
-            )
-    else:
-        context.bot.send_message(
-            chat_id=update.effective_chat.id,
-            text=emojize("There is nothing for you now :pensive:"),
-        )
+    while number:
+        result = mapper[number % 10] + result
+        number //= 10
 
-
-#
-# def start(update: Update, context: CallbackContext) -> None:
-#     """Send message on `/start`."""
-#     # Get user that sent /start and log his name
-#     user = update.message.from_user
-#     # logger.info("User %s started the conversation.", user.first_name)
-#     # Build InlineKeyboard where each button has a displayed text
-#     # and a string as callback_data
-#     # The keyboard is a list of button rows, where each row is in turn
-#     # a list (hence `[[...]]`).
-#     keyboard = [
-#         [
-#             InlineKeyboardButton("1", callback_data=str(ONE)),
-#             InlineKeyboardButton("2", callback_data=str(TWO)),
-#         ]
-#     ]
-#     reply_markup = InlineKeyboardMarkup(keyboard)
-#     # Send message with text and appended InlineKeyboard
-#     update.message.reply_text(
-#         "Start handler, Choose a route", reply_markup=reply_markup
-#     )
-#     # Tell ConversationHandler that we're in state `FIRST` now
-#     return FIRST
-
-
-def func():
-    pass
-
-
-def cancel():
-    pass
+    return result
 
 
 def main():
@@ -449,43 +494,73 @@ def main():
     # Get the dispatcher to register handlers
     dispatcher = updater.dispatcher
 
+    common_handlers = [
+        CommandHandler("unread", unread),
+        CommandHandler("help", get_info),
+        CommandHandler("new", new_item),
+        CommandHandler("get", get_items),
+        CommandHandler("stats", stat),
+    ]
+
     # Logics
     conv_handler = ConversationHandler(
-        entry_points=[
+        entry_points=common_handlers
+        + [
             CommandHandler("start", start),
             MessageHandler(Filters.forwarded, new_forwarded_item),
-            MessageHandler(Filters.text, start),
+            MessageHandler(Filters.text, new_iteration),
         ],
         states={
             FIRST: [
                 CallbackQueryHandler(new_item, pattern="^new_item$"),
                 CallbackQueryHandler(get_items, pattern="^get_items$"),
                 CallbackQueryHandler(get_info, pattern="^info$"),
-            ],
+                CallbackQueryHandler(end, pattern="^end$"),
+            ]
+            + common_handlers,
             SECOND: [
-                CallbackQueryHandler(new_item_type, pattern="^(cinema|scroll|book)$"),
+                CallbackQueryHandler(
+                    new_item_type, pattern="^(cinema|page_with_curl|books)$"
+                ),
                 CallbackQueryHandler(cross_mark, pattern="^cross_mark$"),
-            ],
-            THIRD: [MessageHandler(Filters.text, save_item)],
+            ]
+            + common_handlers,
+            THIRD: [
+                MessageHandler(Filters.text, save_item),
+                CallbackQueryHandler(end, pattern="^end$"),
+                CallbackQueryHandler(to_beginning, pattern="^to_beginning$"),
+            ]
+            + common_handlers,
             FOURTH: [
                 CallbackQueryHandler(
-                    get_items_type, pattern="^(cinema|scroll|book|mix)$"
+                    get_items_type,
+                    pattern="^(cinema|page_with_curl|books|person_shrugging)$",
                 ),
                 CallbackQueryHandler(cross_mark, pattern="^cross_mark$"),
-            ],
-            FIFTH: [MessageHandler(Filters.text, get_items_number)],
+            ]
+            + common_handlers,
+            FIFTH: [
+                MessageHandler(Filters.text, get_items_number),
+                CallbackQueryHandler(end, pattern="^end$"),
+                CallbackQueryHandler(to_beginning, pattern="^to_beginning$"),
+            ]
+            + common_handlers,
             SIXTH: [
                 CallbackQueryHandler(
-                    new_forwarded_item_type, pattern="^(cinema|scroll|book)$"
+                    new_forwarded_item_type, pattern="^(cinema|page_with_curl|books)$"
                 ),
                 CallbackQueryHandler(cross_mark, pattern="^cross_mark$"),
-            ],
+            ]
+            + common_handlers,
+            SEVEN: [MessageHandler(Filters.text, unread_numbers)],
             END_CONFIRMATION: [
                 CallbackQueryHandler(end, pattern="^end$"),
                 CallbackQueryHandler(to_beginning, pattern="^to_beginning$"),
-            ],
+            ]
+            + common_handlers,
         },
         fallbacks=[CommandHandler("end", end)],
+        per_message=False,
     )
 
     # Add ConversationHandler to dispatcher for handle updates of conversation
@@ -502,6 +577,9 @@ def main():
 
 
 if __name__ == "__main__":
+    # Initialize database management objects
     engine = create_engine(DATABASE_URL)
+    session = sessionmaker(bind=engine)()
 
+    # Run the main part of the program
     main()
