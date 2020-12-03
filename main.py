@@ -571,6 +571,7 @@ def main():
         updater.start_polling()
     elif RUNNING_MODE == "PRODUCTION":
         updater.start_webhook(listen="0.0.0.0", port=PORT, url_path=TELEGRAM_TOKEN)
+        updater.bot.set_webhook(HEROKU_URL + TELEGRAM_TOKEN)
 
     # Close listener when it's necessary
     updater.idle()
