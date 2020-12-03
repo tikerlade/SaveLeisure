@@ -6,8 +6,7 @@
 
 Telegram bot that will save interesting information that you send to it and which you want to read / watch later. Such information as a blogpost :page_with_curl:, film :movie_camera: or book :books:.
 
-![Adding item](pics/adding_item.gif)
-
+<img src="https://github.com/tikerlade/SaveLeisure/blob/main/pics/adding_item.gif" width="243" height="500">
 
 ## Current stage :watch:
 This is a bot :robot: for automation your basic routine of sending staff that you want to read :soon: to your **Saved Messages** which will shortly become a mess :dizzy_face: where you can't find anything.
