@@ -29,7 +29,7 @@ from bot.models import ItemType, ToSeeItem, User
 # General information
 RUNNING_MODE = "PRODUCTION"
 TELEGRAM_TOKEN = str(os.getenv("TELEGRAM_TOKEN"))
-HEROKU_URL = str(os.getenv("HEROKU_APP"))
+HEROKU_URL = str(os.getenv("HEROKU_URL"))
 DATABASE_URL = str(os.getenv("DATABASE_URL"))
 PORT = int(os.environ.get("PORT", "8443"))
 
@@ -489,7 +489,7 @@ def number_to_emoji(number):
 
 def main():
     # Updater initialization with TELEGRAM token
-    updater = Updater(token=TELEGRAM_TOKEN, use_context=True)
+    updater = Updater(token=TELEGRAM_TOKEN)
 
     # Get the dispatcher to register handlers
     dispatcher = updater.dispatcher
@@ -560,7 +560,6 @@ def main():
             + common_handlers,
         },
         fallbacks=[CommandHandler("end", end)],
-        per_message=False,
     )
 
     # Add ConversationHandler to dispatcher for handle updates of conversation
