@@ -89,3 +89,13 @@ python bot/main.py --local
 ```
 Чтобы не ломать себе жизнь, можете просто открыть бота по ссылке:
 > Bot :robot: is available by the following [link](http://t.me/SaveLeisureBot)
+
+**Участники проекта**
+| Имя | Telegram | 
+| --- | --- |
+| Кузнецов Иван |[@kuznetsof_ivan](http://t.me/kuznetsof_ivan)|
+| Чучин Дмитрий  | [@CapitanJamesFlint](http://t.me/CapitanJamesFlint) |
+| Шевелев Роман | [@rmnshv](http://t.me/rmnshv) | 
+| Егоров Матвей | [@mattopewd](http://t.me/mattopewd) | 
+
+
