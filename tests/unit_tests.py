@@ -16,4 +16,16 @@ def test_get_items_type:
     assert get_items_type(update, context) == FIFTH
 
 def test_get_items_number:
-    
+    assert get_items_number(update, context) == END_CONFIRMATION
+
+def test_get_info:
+    assert get_info(update, context) == END_CONFIRMATION
+
+def test_stat:
+    assert stat(update, context) == END_CONFIRMATION
+
+def test_new_item_type:
+    assert new_item_type(update, context) == THIRD
+
+def test_end:
+    assert end(update, context) == END
