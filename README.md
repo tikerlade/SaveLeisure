@@ -100,8 +100,8 @@ python bot/main.py --local
 | Имя | Telegram | 
 | --- | --- |
 | Кузнецов Иван |[@kuznetsof_ivan](http://t.me/kuznetsof_ivan)|
-| Чучин Дмитрий  | [@CapitanJamesFlint](http://t.me/CapitanJamesFlint) |
-| Шевелев Роман | [@rmnshv](http://t.me/rmnshv) | 
-| Егоров Матвей | [@mattopewd](http://t.me/mattopewd) | 
+| Чучин Дмитрий  | [@CapitanJamesFlint](http://t.me/CapitanJamesFlint)|
+| Шевелев Роман | [@rmnshv](http://t.me/rmnshv)| 
+| Егоров Матвей | [@mattopewd](http://t.me/mattopewd)| 
 
 
