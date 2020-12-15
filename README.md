@@ -1,6 +1,4 @@
 # [SaveLeisure](http://t.me/SaveLeisureBot) :robot:
-[![Build Status](https://travis-ci.com/tikerlade/SaveLeisure.svg?token=QXtXzRqKNghyH5soGYoY&branch=main)](https://travis-ci.com/tikerlade/SaveLeisure)
-[![codecov](https://codecov.io/gh/tikerlade/SaveLeisure/branch/main/graph/badge.svg?token=I8T7ALFRTX)](https://codecov.io/gh/tikerlade/SaveLeisure)
 [![Code style: black](https://img.shields.io/badge/code%20style-black-000000.svg)](https://github.com/psf/black)
 
 
@@ -67,7 +65,10 @@ TODO: mattopewd
 **Кодирование и отладка**
 
 Весь код написан на языке Python. Использовались следующие технологии:
-TODO: tikerlade
+* [python-telegram-bot](https://python-telegram-bot.readthedocs.io/en/stable/index.html) - библиотека для написания бота от Telegram
+* [heroku](https://dashboard.heroku.com/apps) - хостинг, для работы бота
+* [PostgreSQL](https://www.postgresql.org/) - база данных
+
 
 **Unit тестирование**
 
