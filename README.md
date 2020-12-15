@@ -1,7 +1,11 @@
 
 
 # [SaveLeisure](http://t.me/SaveLeisureBot) :robot:
+[![Build Status](https://travis-ci.com/tikerlade/SaveLeisure.svg?token=QXtXzRqKNghyH5soGYoY&branch=main)](https://travis-ci.com/tikerlade/SaveLeisure)
+
+[comment]: <> ([![codecov]&#40;https://codecov.io/gh/tikerlade/SaveLeisure/branch/main/graph/badge.svg?token=I8T7ALFRTX&#41;]&#40;https://codecov.io/gh/tikerlade/SaveLeisure&#41;)
 [![Code style: black](https://img.shields.io/badge/code%20style-black-000000.svg)](https://github.com/psf/black)
+
 
 
 Telegram bot that will save interesting information that you send to it and which you want to read / watch later. Such information as a blogpost :page_with_curl:, film :movie_camera: or book :books:.
