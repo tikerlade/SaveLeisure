@@ -67,7 +67,7 @@ python bot/main.py --local
 <img src="https://i.imgur.com/FbwfdM5.png" width="161" height="471">
 
  2. Container diagram
- <img src="https://i.imgur.com/Krg1hOA.png" width="771" height="511">
+ <img src="https://i.imgur.com/678AQ9L.png" width="771" height="511">
 
 
 
