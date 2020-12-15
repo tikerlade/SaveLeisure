@@ -63,8 +63,11 @@ python bot/main.py --local
 
 **Разработка архитектуры и детальное проектирование**
 
- 1. ![System Context diagram](https://imgur.com/KfiBv8U)
- 2. ![Container diagram](https://imgur.com/a/FYpF7ne)
+ 1. System Context diagram
+<img src="https://i.imgur.com/FbwfdM5.png" width="161" height="471">
+
+ 2. Container diagram
+ <img src="https://i.imgur.com/Krg1hOA.png" width="771" height="511">
 
 
 
