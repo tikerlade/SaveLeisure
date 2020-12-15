@@ -8,7 +8,7 @@ TELEGRAM_TOKEN = str(os.getenv("TELEGRAM_TOKEN"))
 TEST_USER = str(os.getenv("TEST_USER"))
 bot = telebot.TeleBot(TELEGRAM_TOKEN)
 
-
+# some unit & integration tests
 class TestMessageFirst(unittest.TestCase):
     def test_start(self):
         message = '\start'
