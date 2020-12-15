@@ -1,3 +1,4 @@
+
 # [SaveLeisure](http://t.me/SaveLeisureBot) :robot:
 [![Code style: black](https://img.shields.io/badge/code%20style-black-000000.svg)](https://github.com/psf/black)
 
@@ -55,12 +56,17 @@ python bot/main.py --local
 
 **Выработка требований**
 
-TODO: mattopewd
+Пользовательские истории:
+
+ 1. Я как пользователь Telegram, узнав об интересном фильме/книге или узнав полезную информацию, хочу сохранить название или сделать заметку соответственно, чтобы в нужный момент легко найти фильм/книгу или интересующую запись.
+ 2. Как пользователь Telegram, которому написали название фильма/книги, заинтересовав при этом описанием, я хочу сохранить название, переслав сообщение в диалог с ботом SaveLeisure, чтобы после быстро найти интересующий фильм или книгу, не вспоминая слова, по которым можно отыскать это в диалоге с человеком.
 
 **Разработка архитектуры и детальное проектирование**
 
-Вам нужно будет реализовать для вашего проекта первые две диаграммы из подхода https://c4model.com/
-TODO: mattopewd
+ 1. ![System Context diagram](https://imgur.com/KfiBv8U)
+ 2. ![Container diagram](https://imgur.com/a/FYpF7ne)
+
+
 
 **Кодирование и отладка**
 
@@ -104,5 +110,3 @@ python bot/main.py --local
 | Чучин Дмитрий  | [@CapitanJamesFlint](http://t.me/CapitanJamesFlint)|
 | Шевелев Роман | [@rmnshv](http://t.me/rmnshv)| 
 | Егоров Матвей | [@mattopewd](http://t.me/mattopewd)| 
-
-
